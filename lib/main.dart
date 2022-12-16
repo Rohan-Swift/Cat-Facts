@@ -1,7 +1,9 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:internet_connection_checker/internet_connection_checker.dart'
+    as check;
+
+import 'dart:convert';
 
 void main() {
   runApp(const MyApp());
@@ -40,16 +42,30 @@ class _MyAppState extends State<MyApp> {
             children: [
               Padding(
                 padding: const EdgeInsets.fromLTRB(90, 220, 80, 70),
-                child: Builder(builder: (context) {
-                  return Text(res, style: const TextStyle(fontSize: 20));
-                }),
+                child: Builder(
+                  builder: (context) {
+                    return Text(res,
+                        style: const TextStyle(
+                          fontSize: 20,
+                        ));
+                  },
+                ),
               ),
               SizedBox(
                 width: 157,
                 child: ElevatedButton(
                   onPressed: (() async {
-                    res = await getData();
-                    setState(() {});
+                    bool result =
+                        await check.InternetConnectionChecker().hasConnection;
+                    if (result == true) {
+                      res = await getData();
+                      setState(() {});
+                    } else {
+                      print('No internet :(');
+
+                      res = 'Please check your network connection';
+                      setState(() {});
+                    }
                   }),
                   child: Row(
                     children: const [
