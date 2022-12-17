@@ -37,48 +37,50 @@ class _MyAppState extends State<MyApp> {
             'Cat Facts',
           ),
         ),
-        body: Center(
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(90, 220, 80, 70),
-                child: Builder(
-                  builder: (context) {
-                    return Text(res,
-                        style: const TextStyle(
-                          fontSize: 20,
-                        ));
-                  },
-                ),
-              ),
-              SizedBox(
-                width: 157,
-                child: ElevatedButton(
-                  onPressed: (() async {
-                    bool result =
-                        await check.InternetConnectionChecker().hasConnection;
-                    if (result == true) {
-                      res = await getData();
-                      setState(() {});
-                    } else {
-                      print('No internet :(');
-
-                      res = 'Please check your network connection';
-                      setState(() {});
-                    }
-                  }),
-                  child: Row(
-                    children: const [
-                      Text('Get New Fact'),
-                      SizedBox(
-                        width: 10,
-                      ),
-                      Icon(Icons.pets),
-                    ],
+        body: SingleChildScrollView(
+          child: Center(
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(90, 220, 80, 70),
+                  child: Builder(
+                    builder: (context) {
+                      return Text(res,
+                          style: const TextStyle(
+                            fontSize: 20,
+                          ));
+                    },
                   ),
                 ),
-              ),
-            ],
+                SizedBox(
+                  width: 157,
+                  child: ElevatedButton(
+                    onPressed: (() async {
+                      bool result =
+                          await check.InternetConnectionChecker().hasConnection;
+                      if (result == true) {
+                        res = await getData();
+                        setState(() {});
+                      } else {
+                        print('No internet :(');
+
+                        res = 'Please check your network connection';
+                        setState(() {});
+                      }
+                    }),
+                    child: Row(
+                      children: const [
+                        Text('Get New Fact'),
+                        SizedBox(
+                          width: 10,
+                        ),
+                        Icon(Icons.pets),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
