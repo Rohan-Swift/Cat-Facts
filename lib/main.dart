@@ -9,78 +9,91 @@ void main() {
   runApp(const MyApp());
 }
 
-class MyApp extends StatefulWidget {
-  const MyApp({super.key});
-
-  @override
-  State<MyApp> createState() => _MyAppState();
-}
-
-class _MyAppState extends State<MyApp> {
-  Future getData() async {
-    var result = await http.get(Uri.https(
-      'meowfacts.herokuapp.com',
-    ));
-    var json = jsonDecode(result.body);
-    print(json);
-    return json['data'][0];
-  }
-
-  String res = '';
+class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text(
-            'Cat Facts',
-          ),
-        ),
-        body: SingleChildScrollView(
-          child: Center(
-            child: Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(90, 220, 80, 70),
-                  child: Builder(
-                    builder: (context) {
-                      return Text(res,
-                          style: const TextStyle(
-                            fontSize: 20,
-                          ));
-                    },
-                  ),
-                ),
-                SizedBox(
-                  width: 157,
-                  child: ElevatedButton(
-                    onPressed: (() async {
-                      bool result =
-                          await check.InternetConnectionChecker().hasConnection;
-                      if (result == true) {
-                        res = await getData();
-                        setState(() {});
-                      } else {
-                        print('No internet :(');
+    return const MaterialApp(
+      home: CatFactsPage(),
+    );
+  }
+}
 
-                        res = 'Please check your network connection';
-                        setState(() {});
-                      }
-                    }),
-                    child: Row(
-                      children: const [
-                        Text('Get New Fact'),
-                        SizedBox(
-                          width: 10,
+class CatFactsPage extends StatefulWidget {
+  const CatFactsPage({Key? key}) : super(key: key);
+
+  @override
+  State<CatFactsPage> createState() => _CatFactsPageState();
+}
+
+class _CatFactsPageState extends State<CatFactsPage> {
+  Future<String> getData() async {
+    final result = await http.get(Uri.https('meowfacts.herokuapp.com'));
+    final json = jsonDecode(result.body);
+    return json['data'][0];
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Cat Facts'),
+      ),
+      body: SingleChildScrollView(
+        child: Center(
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(90, 220, 80, 70),
+                child: FutureBuilder<String>(
+                  future: getData(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const CircularProgressIndicator();
+                    } else if (snapshot.hasError) {
+                      return Text('Error: ${snapshot.error}');
+                    } else {
+                      final fact = snapshot.data!;
+                      return Text(
+                        fact,
+                        style: const TextStyle(
+                          fontSize: 20,
                         ),
-                        Icon(Icons.pets),
-                      ],
-                    ),
+                      );
+                    }
+                  },
+                ),
+              ),
+              SizedBox(
+                width: 157,
+                child: ElevatedButton(
+                  onPressed: () async {
+                    final hasConnection =
+                        await check.InternetConnectionChecker().hasConnection;
+                    if (hasConnection) {
+                      setState(() {});
+                    } else {
+                      print('No internet :(');
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Please check your network connection'),
+                        ),
+                      );
+                    }
+                  },
+                  child: const Row(
+                    children: [
+                      Text('Get New Fact'),
+                      SizedBox(
+                        width: 10,
+                      ),
+                      Icon(Icons.pets),
+                    ],
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
